@@ -1,0 +1,277 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+
+    <meta
+        name="viewport"
+        content="width=device-width, initial-scale=1.0"
+    >
+
+    <meta
+        name="theme-color"
+        content="#6750a4"
+    >
+
+    <title>Join PartyQueue</title>
+
+    <style>
+        * {
+            box-sizing: border-box;
+        }
+
+        body {
+            margin: 0;
+            min-height: 100vh;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            padding: 24px;
+            background:
+                linear-gradient(
+                    135deg,
+                    #1d1633,
+                    #392d61
+                );
+            color: #ffffff;
+            font-family:
+                Arial,
+                Helvetica,
+                sans-serif;
+        }
+
+        .card {
+            width: 100%;
+            max-width: 430px;
+            padding: 34px 28px;
+            border-radius: 24px;
+            background: #ffffff;
+            color: #221b2e;
+            text-align: center;
+            box-shadow:
+                0 18px 50px
+                rgba(0, 0, 0, 0.35);
+        }
+
+        .music-icon {
+            margin-bottom: 12px;
+            font-size: 64px;
+        }
+
+        h1 {
+            margin: 0;
+            font-size: 32px;
+            letter-spacing: 1px;
+        }
+
+        .subtitle {
+            margin: 12px 0 28px;
+            color: #625b71;
+            font-size: 17px;
+            line-height: 1.5;
+        }
+
+        .party-label {
+            margin-bottom: 8px;
+            color: #625b71;
+            font-size: 15px;
+        }
+
+        .party-code {
+            margin-bottom: 28px;
+            font-size: 34px;
+            font-weight: bold;
+            letter-spacing: 5px;
+            overflow-wrap: anywhere;
+        }
+
+        label {
+            display: block;
+            margin-bottom: 8px;
+            text-align: left;
+            font-weight: bold;
+        }
+
+        input {
+            width: 100%;
+            min-height: 54px;
+            padding: 12px 16px;
+            border: 2px solid #cac4d0;
+            border-radius: 12px;
+            font-size: 18px;
+        }
+
+        input:focus {
+            border-color: #6750a4;
+            outline: none;
+        }
+
+        button {
+            width: 100%;
+            min-height: 56px;
+            margin-top: 18px;
+            border: 0;
+            border-radius: 28px;
+            background: #6750a4;
+            color: #ffffff;
+            font-size: 17px;
+            font-weight: bold;
+            cursor: pointer;
+        }
+
+        button:hover {
+            background: #57418d;
+        }
+
+        button:disabled {
+            background: #aaa3b3;
+            cursor: not-allowed;
+        }
+
+        .message {
+            min-height: 24px;
+            margin: 20px 0 0;
+            color: #386a20;
+            font-weight: bold;
+            line-height: 1.4;
+        }
+
+        .note {
+            margin: 22px 0 0;
+            color: #79747e;
+            font-size: 13px;
+            line-height: 1.4;
+        }
+    </style>
+</head>
+
+<body>
+    <main class="card">
+        <div
+            class="music-icon"
+            aria-hidden="true"
+        >
+            🎵
+        </div>
+
+        <h1>PARTYQUEUE</h1>
+
+        <p class="subtitle">
+            You have been invited to help choose the music.
+        </p>
+
+        <div class="party-label">
+            Party code
+        </div>
+
+        <div
+            id="partyCode"
+            class="party-code"
+        >
+            Loading...
+        </div>
+
+        <form id="joinForm">
+            <label for="guestName">
+                Your name
+            </label>
+
+            <input
+                id="guestName"
+                name="guestName"
+                type="text"
+                maxlength="30"
+                autocomplete="name"
+                placeholder="Enter your name"
+                required
+            >
+
+            <button
+                id="continueButton"
+                type="submit"
+            >
+                CONTINUE
+            </button>
+        </form>
+
+        <p
+            id="message"
+            class="message"
+            aria-live="polite"
+        ></p>
+
+        <p class="note">
+            Song searching and requests will be added in the
+            next version.
+        </p>
+    </main>
+
+    <script>
+        const parameters =
+            new URLSearchParams(window.location.search);
+
+        const partyCode =
+            (parameters.get("code") || "")
+                .trim()
+                .toUpperCase();
+
+        const partyCodeElement =
+            document.getElementById("partyCode");
+
+        const joinForm =
+            document.getElementById("joinForm");
+
+        const guestNameInput =
+            document.getElementById("guestName");
+
+        const continueButton =
+            document.getElementById("continueButton");
+
+        const messageElement =
+            document.getElementById("message");
+
+        if (partyCode) {
+            partyCodeElement.textContent = partyCode;
+        } else {
+            partyCodeElement.textContent = "NO CODE";
+            continueButton.disabled = true;
+
+            messageElement.textContent =
+                "Please scan a valid PartyQueue QR code.";
+        }
+
+        const savedName =
+            localStorage.getItem("partyQueueGuestName");
+
+        if (savedName) {
+            guestNameInput.value = savedName;
+        }
+
+        joinForm.addEventListener(
+            "submit",
+            function (event) {
+                event.preventDefault();
+
+                const guestName =
+                    guestNameInput.value.trim();
+
+                if (!guestName) {
+                    messageElement.textContent =
+                        "Please enter your name.";
+
+                    guestNameInput.focus();
+                    return;
+                }
+
+                localStorage.setItem(
+                    "partyQueueGuestName",
+                    guestName
+                );
+
+                messageElement.textContent =
+                    `Welcome, ${guestName}! You joined party ${partyCode}.`;
+            }
+        );
+    </script>
+</body>
+</html>
