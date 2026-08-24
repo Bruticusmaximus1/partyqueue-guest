@@ -1,0 +1,288 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+
+    <meta
+        name="viewport"
+        content="width=device-width, initial-scale=1.0"
+    >
+
+    <meta
+        name="referrer"
+        content="no-referrer"
+    >
+
+    <meta
+        http-equiv="Cache-Control"
+        content="no-store"
+    >
+
+    <meta
+        name="theme-color"
+        content="#6750a4"
+    >
+
+    <title>Returning to PartyQueue</title>
+
+    <style>
+        * {
+            box-sizing: border-box;
+        }
+
+        body {
+            margin: 0;
+            min-height: 100vh;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            padding: 24px;
+            background:
+                linear-gradient(
+                    135deg,
+                    #1d1633,
+                    #392d61
+                );
+            color: #ffffff;
+            font-family:
+                Arial,
+                Helvetica,
+                sans-serif;
+        }
+
+        .card {
+            width: 100%;
+            max-width: 430px;
+            padding: 36px 28px;
+            border-radius: 24px;
+            background: #ffffff;
+            color: #221b2e;
+            text-align: center;
+            box-shadow:
+                0 18px 50px
+                rgba(0, 0, 0, 0.35);
+        }
+
+        .music-icon {
+            margin-bottom: 14px;
+            font-size: 64px;
+        }
+
+        h1 {
+            margin: 0;
+            font-size: 30px;
+            letter-spacing: 1px;
+        }
+
+        .status {
+            margin: 24px 0 10px;
+            font-size: 20px;
+            font-weight: bold;
+            line-height: 1.4;
+        }
+
+        .details {
+            margin: 0;
+            color: #625b71;
+            font-size: 16px;
+            line-height: 1.5;
+        }
+
+        button {
+            width: 100%;
+            min-height: 56px;
+            margin-top: 26px;
+            border: 0;
+            border-radius: 28px;
+            background: #6750a4;
+            color: #ffffff;
+            font-size: 17px;
+            font-weight: bold;
+            cursor: pointer;
+        }
+
+        button:hover {
+            background: #57418d;
+        }
+
+        .error {
+            color: #ba1a1a;
+        }
+
+        [hidden] {
+            display: none;
+        }
+    </style>
+</head>
+
+<body>
+    <main class="card">
+        <div
+            class="music-icon"
+            aria-hidden="true"
+        >
+            🎵
+        </div>
+
+        <h1>PARTYQUEUE</h1>
+
+        <p
+            id="status"
+            class="status"
+            aria-live="polite"
+        >
+            Returning to PartyQueue...
+        </p>
+
+        <p
+            id="details"
+            class="details"
+        >
+            If the app does not open automatically,
+            tap the button below.
+        </p>
+
+        <button
+            id="openAppButton"
+            type="button"
+            hidden
+        >
+            RETURN TO PARTYQUEUE
+        </button>
+    </main>
+
+    <script>
+        const parameters =
+            new URLSearchParams(
+                window.location.search
+            );
+
+        const authorizationCode =
+            parameters.get("code");
+
+        const state =
+            parameters.get("state");
+
+        const spotifyError =
+            parameters.get("error");
+
+        const spotifyErrorDescription =
+            parameters.get("error_description");
+
+        const statusElement =
+            document.getElementById("status");
+
+        const detailsElement =
+            document.getElementById("details");
+
+        const openAppButton =
+            document.getElementById(
+                "openAppButton"
+            );
+
+        function createPartyQueueLink() {
+
+            const destination =
+                new URL(
+                    "com.ejward.partyqueue://" +
+                    "spotify-callback"
+                );
+
+            if (authorizationCode) {
+                destination.searchParams.set(
+                    "code",
+                    authorizationCode
+                );
+            }
+
+            if (state) {
+                destination.searchParams.set(
+                    "state",
+                    state
+                );
+            }
+
+            if (spotifyError) {
+                destination.searchParams.set(
+                    "error",
+                    spotifyError
+                );
+            }
+
+            if (spotifyErrorDescription) {
+                destination.searchParams.set(
+                    "error_description",
+                    spotifyErrorDescription
+                );
+            }
+
+            return destination.toString();
+        }
+
+        /*
+         * PartyQueue always supplies a state value.
+         *
+         * It will later compare this returned state with the
+         * value saved before Spotify login.
+         */
+        const responseIsValid =
+            Boolean(state) &&
+            Boolean(
+                authorizationCode ||
+                spotifyError
+            );
+
+        if (!responseIsValid) {
+
+            statusElement.textContent =
+                "Invalid Spotify response";
+
+            statusElement.classList.add(
+                "error"
+            );
+
+            detailsElement.textContent =
+                "Return to PartyQueue and try connecting " +
+                "Spotify again.";
+
+        } else {
+
+            const partyQueueLink =
+                createPartyQueueLink();
+
+            /*
+             * Remove Spotify's temporary authorization
+             * values from the visible browser address.
+             */
+            window.history.replaceState(
+                {},
+                document.title,
+                window.location.pathname
+            );
+
+            openAppButton.hidden = false;
+
+            openAppButton.addEventListener(
+                "click",
+                function () {
+                    window.location.href =
+                        partyQueueLink;
+                }
+            );
+
+            /*
+             * Try opening PartyQueue automatically.
+             * The button remains available if the browser
+             * requires the user to confirm.
+             */
+            window.setTimeout(
+                function () {
+                    window.location.href =
+                        partyQueueLink;
+                },
+                350
+            );
+        }
+    </script>
+</body>
+</html>
