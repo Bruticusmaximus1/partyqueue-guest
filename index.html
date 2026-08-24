@@ -131,9 +131,32 @@
         .message {
             min-height: 24px;
             margin: 20px 0 0;
-            color: #386a20;
             font-weight: bold;
             line-height: 1.4;
+        }
+
+        .message.error {
+            color: #ba1a1a;
+        }
+
+        .message.success {
+            color: #386a20;
+        }
+
+        .success-panel {
+            padding: 20px;
+            border-radius: 16px;
+            background: #e9f7df;
+            color: #234b12;
+        }
+
+        .success-panel h2 {
+            margin: 0 0 12px;
+        }
+
+        .success-panel p {
+            margin: 8px 0;
+            line-height: 1.5;
         }
 
         .note {
@@ -141,6 +164,10 @@
             color: #79747e;
             font-size: 13px;
             line-height: 1.4;
+        }
+
+        [hidden] {
+            display: none;
         }
     </style>
 </head>
@@ -190,9 +217,23 @@
                 id="continueButton"
                 type="submit"
             >
-                CONTINUE
+                JOIN PARTY
             </button>
         </form>
+
+        <section
+            id="successPanel"
+            class="success-panel"
+            hidden
+        >
+            <h2>You're in! 🎉</h2>
+
+            <p id="successMessage"></p>
+
+            <p>
+                Song searching and requests will be added next.
+            </p>
+        </section>
 
         <p
             id="message"
@@ -201,12 +242,38 @@
         ></p>
 
         <p class="note">
-            Song searching and requests will be added in the
-            next version.
+            PartyQueue remembers your guest session on this
+            device so you can return to the party.
         </p>
     </main>
 
-    <script>
+    <script type="module">
+        import {
+            createClient
+        } from "https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.112.3/+esm";
+
+        /*
+         * Replace these two placeholders with the Project URL
+         * and publishable key saved in Notepad.
+         */
+        const SUPABASE_URL =
+            "https://nszqzyrhlyjkvzfrbeih.supabase.co";
+
+        const SUPABASE_PUBLISHABLE_KEY =
+            "sb_publishable_AGN1WppiECaM4_WvbOxdLg_-QXEM4o-";
+
+        const supabaseClient = createClient(
+            SUPABASE_URL,
+            SUPABASE_PUBLISHABLE_KEY,
+            {
+                auth: {
+                    persistSession: true,
+                    autoRefreshToken: true,
+                    detectSessionInUrl: true
+                }
+            }
+        );
+
         const parameters =
             new URLSearchParams(window.location.search);
 
@@ -214,6 +281,9 @@
             (parameters.get("code") || "")
                 .trim()
                 .toUpperCase();
+
+        const validPartyCodePattern =
+            /^[A-HJ-NP-Z2-9]{6}$/;
 
         const partyCodeElement =
             document.getElementById("partyCode");
@@ -230,18 +300,119 @@
         const messageElement =
             document.getElementById("message");
 
-        if (partyCode) {
+        const successPanel =
+            document.getElementById("successPanel");
+
+        const successMessage =
+            document.getElementById("successMessage");
+
+        const configurationIsReady =
+            !SUPABASE_URL.includes("PASTE_YOUR") &&
+            !SUPABASE_PUBLISHABLE_KEY.includes(
+                "PASTE_YOUR"
+            );
+
+        function showError(message) {
+            messageElement.textContent = message;
+            messageElement.className =
+                "message error";
+        }
+
+        function clearMessage() {
+            messageElement.textContent = "";
+            messageElement.className =
+                "message";
+        }
+
+        function getFriendlyError(error) {
+            const technicalMessage =
+                error?.message || "";
+
+            if (
+                technicalMessage.includes(
+                    "Party not found"
+                )
+            ) {
+                return (
+                    "This party could not be found, " +
+                    "or it is no longer active."
+                );
+            }
+
+            if (
+                technicalMessage.includes(
+                    "Anonymous sign-ins are disabled"
+                )
+            ) {
+                return (
+                    "Guest sign-in is not currently enabled."
+                );
+            }
+
+            if (
+                technicalMessage.includes(
+                    "Failed to fetch"
+                )
+            ) {
+                return (
+                    "Could not reach PartyQueue. " +
+                    "Check your internet connection and try again."
+                );
+            }
+
+            return technicalMessage
+                ? `Could not join the party: ${technicalMessage}`
+                : "Could not join the party. Please try again.";
+        }
+
+        async function ensureAnonymousSession() {
+            const {
+                data,
+                error
+            } =
+                await supabaseClient.auth.getSession();
+
+            if (error) {
+                throw error;
+            }
+
+            if (!data.session) {
+                const {
+                    error: signInError
+                } =
+                    await supabaseClient.auth
+                        .signInAnonymously();
+
+                if (signInError) {
+                    throw signInError;
+                }
+            }
+        }
+
+        if (validPartyCodePattern.test(partyCode)) {
             partyCodeElement.textContent = partyCode;
         } else {
             partyCodeElement.textContent = "NO CODE";
             continueButton.disabled = true;
 
-            messageElement.textContent =
-                "Please scan a valid PartyQueue QR code.";
+            showError(
+                "Please scan a valid PartyQueue QR code."
+            );
+        }
+
+        if (!configurationIsReady) {
+            continueButton.disabled = true;
+
+            showError(
+                "The PartyQueue website has not been " +
+                "connected to Supabase yet."
+            );
         }
 
         const savedName =
-            localStorage.getItem("partyQueueGuestName");
+            localStorage.getItem(
+                "partyQueueGuestName"
+            );
 
         if (savedName) {
             guestNameInput.value = savedName;
@@ -249,27 +420,100 @@
 
         joinForm.addEventListener(
             "submit",
-            function (event) {
+            async function (event) {
                 event.preventDefault();
 
                 const guestName =
                     guestNameInput.value.trim();
 
                 if (!guestName) {
-                    messageElement.textContent =
-                        "Please enter your name.";
+                    showError(
+                        "Please enter your name."
+                    );
 
                     guestNameInput.focus();
                     return;
                 }
 
-                localStorage.setItem(
-                    "partyQueueGuestName",
-                    guestName
-                );
+                if (guestName.length > 30) {
+                    showError(
+                        "Your name must be 30 characters or fewer."
+                    );
 
-                messageElement.textContent =
-                    `Welcome, ${guestName}! You joined party ${partyCode}.`;
+                    guestNameInput.focus();
+                    return;
+                }
+
+                if (
+                    !validPartyCodePattern.test(
+                        partyCode
+                    )
+                ) {
+                    showError(
+                        "Please scan a valid PartyQueue QR code."
+                    );
+
+                    return;
+                }
+
+                clearMessage();
+
+                continueButton.disabled = true;
+                guestNameInput.disabled = true;
+                continueButton.textContent =
+                    "JOINING...";
+
+                let joinedSuccessfully = false;
+
+                try {
+                    await ensureAnonymousSession();
+
+                    const {
+                        error
+                    } =
+                        await supabaseClient.rpc(
+                            "join_party",
+                            {
+                                p_code: partyCode,
+                                p_display_name: guestName
+                            }
+                        );
+
+                    if (error) {
+                        throw error;
+                    }
+
+                    localStorage.setItem(
+                        "partyQueueGuestName",
+                        guestName
+                    );
+
+                    successMessage.textContent =
+                        `${guestName}, you joined party ` +
+                        `${partyCode}.`;
+
+                    joinForm.hidden = true;
+                    successPanel.hidden = false;
+                    joinedSuccessfully = true;
+
+                } catch (error) {
+                    console.error(
+                        "PartyQueue join error:",
+                        error
+                    );
+
+                    showError(
+                        getFriendlyError(error)
+                    );
+
+                } finally {
+                    if (!joinedSuccessfully) {
+                        continueButton.disabled = false;
+                        guestNameInput.disabled = false;
+                        continueButton.textContent =
+                            "JOIN PARTY";
+                    }
+                }
             }
         );
     </script>
