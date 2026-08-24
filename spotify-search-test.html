@@ -13,7 +13,7 @@
         content="#6750a4"
     >
 
-    <title>PartyQueue Spotify Search Test</title>
+    <title>PartyQueue Song Request Test</title>
 
     <style>
         * {
@@ -39,7 +39,7 @@
 
         .page {
             width: 100%;
-            max-width: 700px;
+            max-width: 760px;
             margin: 0 auto;
         }
 
@@ -60,7 +60,7 @@
         }
 
         .subtitle {
-            margin: 12px 0 26px;
+            margin: 12px 0 20px;
             color: #625b71;
             text-align: center;
             line-height: 1.5;
@@ -101,13 +101,13 @@
         }
 
         button {
-            min-height: 54px;
+            min-height: 50px;
             padding: 0 22px;
             border: 0;
-            border-radius: 27px;
+            border-radius: 25px;
             background: #6750a4;
             color: #ffffff;
-            font-size: 16px;
+            font-size: 15px;
             font-weight: bold;
             cursor: pointer;
         }
@@ -119,6 +119,10 @@
         button:disabled {
             background: #aaa3b3;
             cursor: not-allowed;
+        }
+
+        .search-button {
+            min-height: 54px;
         }
 
         .message {
@@ -153,9 +157,9 @@
         }
 
         .track-image {
-            width: 72px;
-            height: 72px;
-            flex: 0 0 72px;
+            width: 78px;
+            height: 78px;
+            flex: 0 0 78px;
             border-radius: 10px;
             background: #e8e2eb;
             object-fit: cover;
@@ -210,7 +214,34 @@
             font-weight: bold;
         }
 
-        @media (max-width: 550px) {
+        .track-actions {
+            width: 145px;
+            flex: 0 0 145px;
+            text-align: center;
+        }
+
+        .request-button {
+            width: 100%;
+        }
+
+        .request-status {
+            min-height: 18px;
+            margin: 7px 0 0;
+            font-size: 12px;
+            line-height: 1.35;
+        }
+
+        .request-status.success {
+            color: #386a20;
+            font-weight: bold;
+        }
+
+        .request-status.error {
+            color: #ba1a1a;
+            font-weight: bold;
+        }
+
+        @media (max-width: 620px) {
             body {
                 padding: 14px;
             }
@@ -224,18 +255,28 @@
             }
 
             input,
-            button {
+            .search-button {
                 width: 100%;
             }
 
-            button {
+            .search-button {
                 margin-top: 10px;
             }
 
+            .track {
+                align-items: flex-start;
+                flex-wrap: wrap;
+            }
+
             .track-image {
-                width: 60px;
-                height: 60px;
-                flex-basis: 60px;
+                width: 64px;
+                height: 64px;
+                flex-basis: 64px;
+            }
+
+            .track-actions {
+                width: 100%;
+                flex-basis: 100%;
             }
         }
     </style>
@@ -247,7 +288,7 @@
             <h1>🎵 PARTYQUEUE</h1>
 
             <p class="subtitle">
-                Spotify search function test
+                Search Spotify and submit a song request
             </p>
 
             <div
@@ -275,6 +316,7 @@
 
                     <button
                         id="searchButton"
+                        class="search-button"
                         type="submit"
                     >
                         SEARCH
@@ -302,8 +344,8 @@
         } from "https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.112.3/+esm";
 
         /*
-         * Replace these placeholders with the same values
-         * already used in the main index.html page.
+         * Replace these placeholders with the same public
+         * Supabase values used in index.html.
          */
         const SUPABASE_URL =
             "https://nszqzyrhlyjkvzfrbeih.supabase.co";
@@ -464,6 +506,167 @@
             return placeholder;
         }
 
+        async function readFunctionError(
+            error
+        ) {
+            if (
+                error?.context &&
+                typeof error.context.json ===
+                    "function"
+            ) {
+                try {
+                    const errorBody =
+                        await error.context.json();
+
+                    if (
+                        typeof errorBody?.error ===
+                            "string"
+                    ) {
+                        return errorBody.error;
+                    }
+
+                    if (
+                        typeof errorBody?.message ===
+                            "string"
+                    ) {
+                        return errorBody.message;
+                    }
+                } catch {
+                    /*
+                     * Fall back to the normal error message.
+                     */
+                }
+            }
+
+            return (
+                error?.message ||
+                "PartyQueue could not complete the request."
+            );
+        }
+
+        async function confirmGuestSession() {
+            const {
+                data,
+                error
+            } =
+                await supabaseClient.auth
+                    .getSession();
+
+            if (error) {
+                throw error;
+            }
+
+            if (!data.session) {
+                throw new Error(
+                    "Open the normal PartyQueue guest page " +
+                    "and join this party first."
+                );
+            }
+        }
+
+        async function requestTrack(
+            track,
+            requestButton,
+            statusElement
+        ) {
+            requestButton.disabled =
+                true;
+
+            requestButton.textContent =
+                "REQUESTING...";
+
+            statusElement.textContent =
+                "";
+
+            statusElement.className =
+                "request-status";
+
+            try {
+                await confirmGuestSession();
+
+                const {
+                    error
+                } =
+                    await supabaseClient.rpc(
+                        "request_song",
+                        {
+                            p_code:
+                                partyCode,
+
+                            p_spotify_track_id:
+                                track.spotifyTrackId,
+
+                            p_spotify_uri:
+                                track.spotifyUri,
+
+                            p_track_name:
+                                track.trackName,
+
+                            p_artist_name:
+                                track.artistName,
+
+                            p_album_name:
+                                track.albumName || "",
+
+                            p_image_url:
+                                track.imageUrl || ""
+                        }
+                    );
+
+                if (error) {
+                    throw error;
+                }
+
+                requestButton.textContent =
+                    "REQUESTED";
+
+                statusElement.textContent =
+                    "Added to the party queue.";
+
+                statusElement.className =
+                    "request-status success";
+
+            } catch (error) {
+                console.error(
+                    "Song request error:",
+                    error
+                );
+
+                const errorMessage =
+                    error?.message ||
+                    "Could not request this song.";
+
+                if (
+                    errorMessage.includes(
+                        "already been requested"
+                    )
+                ) {
+                    requestButton.textContent =
+                        "ALREADY REQUESTED";
+
+                    statusElement.textContent =
+                        "This song is already in the queue.";
+
+                    statusElement.className =
+                        "request-status error";
+
+                    return;
+                }
+
+                requestButton.disabled =
+                    false;
+
+                requestButton.textContent =
+                    "REQUEST";
+
+                statusElement.textContent =
+                    errorMessage;
+
+                statusElement.className =
+                    "request-status error";
+            }
+        }
+
         function createTrackElement(
             track
         ) {
@@ -541,11 +744,6 @@
                 track.albumName ||
                 "Album unavailable";
 
-            const duration =
-                formatDuration(
-                    track.durationMs
-                );
-
             const metadataElement =
                 document.createElement(
                     "div"
@@ -554,10 +752,15 @@
             metadataElement.className =
                 "track-meta";
 
+            const duration =
+                formatDuration(
+                    track.durationMs
+                );
+
             metadataElement.textContent =
                 duration
                     ? `Duration: ${duration}`
-                    : `Spotify track ID: ${track.spotifyTrackId}`;
+                    : "Spotify track";
 
             detailsElement.append(
                 trackNameElement,
@@ -566,8 +769,81 @@
                 metadataElement
             );
 
-            trackElement.appendChild(
-                detailsElement
+            const actionsElement =
+                document.createElement(
+                    "div"
+                );
+
+            actionsElement.className =
+                "track-actions";
+
+            const requestButton =
+                document.createElement(
+                    "button"
+                );
+
+            requestButton.className =
+                "request-button";
+
+            requestButton.type =
+                "button";
+
+            requestButton.textContent =
+                "REQUEST";
+
+            const statusElement =
+                document.createElement(
+                    "p"
+                );
+
+            statusElement.className =
+                "request-status";
+
+            statusElement.setAttribute(
+                "aria-live",
+                "polite"
+            );
+
+            const trackIsValid =
+                typeof track.spotifyTrackId ===
+                    "string" &&
+                track.spotifyTrackId.length > 0 &&
+                typeof track.spotifyUri ===
+                    "string" &&
+                track.spotifyUri.startsWith(
+                    "spotify:track:"
+                );
+
+            if (!trackIsValid) {
+                requestButton.disabled =
+                    true;
+
+                statusElement.textContent =
+                    "This track cannot be requested.";
+
+                statusElement.className =
+                    "request-status error";
+            } else {
+                requestButton.addEventListener(
+                    "click",
+                    function () {
+                        requestTrack(
+                            track,
+                            requestButton,
+                            statusElement
+                        );
+                    }
+                );
+            }
+
+            actionsElement.append(
+                requestButton,
+                statusElement
+            );
+
+            trackElement.append(
+                detailsElement,
+                actionsElement
             );
 
             return trackElement;
@@ -610,68 +886,6 @@
                 `Found ${tracks.length} Spotify tracks.`,
                 "success"
             );
-        }
-
-        async function readFunctionError(
-            error
-        ) {
-            /*
-             * Supabase HTTP function errors may contain the
-             * JSON response returned by our Edge Function.
-             */
-            if (
-                error?.context &&
-                typeof error.context.json ===
-                    "function"
-            ) {
-                try {
-                    const errorBody =
-                        await error.context.json();
-
-                    if (
-                        typeof errorBody?.error ===
-                            "string"
-                    ) {
-                        return errorBody.error;
-                    }
-
-                    if (
-                        typeof errorBody?.message ===
-                            "string"
-                    ) {
-                        return errorBody.message;
-                    }
-                } catch {
-                    /*
-                     * Fall back to the normal error message.
-                     */
-                }
-            }
-
-            return (
-                error?.message ||
-                "PartyQueue could not search Spotify."
-            );
-        }
-
-        async function confirmGuestSession() {
-            const {
-                data,
-                error
-            } =
-                await supabaseClient.auth
-                    .getSession();
-
-            if (error) {
-                throw error;
-            }
-
-            if (!data.session) {
-                throw new Error(
-                    "Open the normal PartyQueue guest page " +
-                    "and join this party first."
-                );
-            }
         }
 
         const configurationIsReady =
@@ -779,7 +993,7 @@
 
                 } catch (error) {
                     console.error(
-                        "Spotify search test error:",
+                        "Spotify search error:",
                         error
                     );
 
