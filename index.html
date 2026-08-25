@@ -23,10 +23,7 @@
         body {
             margin: 0;
             min-height: 100vh;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            padding: 24px;
+            padding: 20px;
             background:
                 linear-gradient(
                     135deg,
@@ -40,21 +37,28 @@
                 sans-serif;
         }
 
-        .card {
+        .page {
             width: 100%;
-            max-width: 430px;
-            padding: 34px 28px;
+            max-width: 760px;
+            margin: 0 auto;
+        }
+
+        .card {
+            padding: 30px;
             border-radius: 24px;
             background: #ffffff;
             color: #221b2e;
-            text-align: center;
             box-shadow:
                 0 18px 50px
                 rgba(0, 0, 0, 0.35);
         }
 
+        .header {
+            text-align: center;
+        }
+
         .music-icon {
-            margin-bottom: 12px;
+            margin-bottom: 10px;
             font-size: 64px;
         }
 
@@ -65,14 +69,14 @@
         }
 
         .subtitle {
-            margin: 12px 0 28px;
+            margin: 12px 0 24px;
             color: #625b71;
             font-size: 17px;
             line-height: 1.5;
         }
 
         .party-label {
-            margin-bottom: 8px;
+            margin-bottom: 7px;
             color: #625b71;
             font-size: 15px;
         }
@@ -85,10 +89,27 @@
             overflow-wrap: anywhere;
         }
 
+        .section {
+            padding-top: 26px;
+            border-top: 1px solid #ded8e2;
+        }
+
+        .section-title {
+            margin: 0 0 8px;
+            text-align: center;
+            font-size: 24px;
+        }
+
+        .section-description {
+            margin: 0 0 22px;
+            color: #625b71;
+            text-align: center;
+            line-height: 1.5;
+        }
+
         label {
             display: block;
             margin-bottom: 8px;
-            text-align: left;
             font-weight: bold;
         }
 
@@ -98,7 +119,7 @@
             padding: 12px 16px;
             border: 2px solid #cac4d0;
             border-radius: 12px;
-            font-size: 18px;
+            font-size: 17px;
         }
 
         input:focus {
@@ -107,14 +128,13 @@
         }
 
         button {
-            width: 100%;
-            min-height: 56px;
-            margin-top: 18px;
+            min-height: 52px;
+            padding: 0 22px;
             border: 0;
-            border-radius: 28px;
+            border-radius: 26px;
             background: #6750a4;
             color: #ffffff;
-            font-size: 17px;
+            font-size: 16px;
             font-weight: bold;
             cursor: pointer;
         }
@@ -128,11 +148,46 @@
             cursor: not-allowed;
         }
 
+        .full-width-button {
+            width: 100%;
+            margin-top: 18px;
+        }
+
+        .joined-panel {
+            margin-bottom: 24px;
+            padding: 18px;
+            border-radius: 16px;
+            background: #e9f7df;
+            color: #234b12;
+            text-align: center;
+        }
+
+        .joined-panel strong {
+            display: block;
+            margin-bottom: 5px;
+            font-size: 20px;
+        }
+
+        .search-row {
+            display: flex;
+            gap: 10px;
+        }
+
+        .search-row input {
+            flex: 1;
+            min-width: 0;
+        }
+
+        .search-button {
+            flex: 0 0 auto;
+        }
+
         .message {
             min-height: 24px;
-            margin: 20px 0 0;
+            margin: 18px 0;
             font-weight: bold;
-            line-height: 1.4;
+            line-height: 1.45;
+            text-align: center;
         }
 
         .message.error {
@@ -143,108 +198,296 @@
             color: #386a20;
         }
 
-        .success-panel {
-            padding: 20px;
+        .results {
+            display: grid;
+            gap: 14px;
+        }
+
+        .track {
+            display: flex;
+            gap: 14px;
+            align-items: center;
+            padding: 14px;
+            border: 1px solid #ded8e2;
             border-radius: 16px;
-            background: #e9f7df;
-            color: #234b12;
+            background: #faf8fc;
         }
 
-        .success-panel h2 {
-            margin: 0 0 12px;
+        .track-image {
+            width: 78px;
+            height: 78px;
+            flex: 0 0 78px;
+            border-radius: 10px;
+            background: #e8e2eb;
+            object-fit: cover;
         }
 
-        .success-panel p {
-            margin: 8px 0;
-            line-height: 1.5;
+        .image-placeholder {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 30px;
+        }
+
+        .track-details {
+            min-width: 0;
+            flex: 1;
+        }
+
+        .track-name {
+            margin: 0 0 5px;
+            font-size: 18px;
+            font-weight: bold;
+            overflow-wrap: anywhere;
+        }
+
+        .artist-name {
+            margin: 0 0 4px;
+            color: #4c4557;
+            overflow-wrap: anywhere;
+        }
+
+        .album-name {
+            margin: 0;
+            color: #79747e;
+            font-size: 14px;
+            overflow-wrap: anywhere;
+        }
+
+        .track-meta {
+            margin-top: 7px;
+            color: #79747e;
+            font-size: 13px;
+        }
+
+        .explicit {
+            display: inline-block;
+            margin-left: 6px;
+            padding: 2px 5px;
+            border-radius: 4px;
+            background: #4c4557;
+            color: #ffffff;
+            font-size: 10px;
+            font-weight: bold;
+            vertical-align: middle;
+        }
+
+        .track-actions {
+            width: 145px;
+            flex: 0 0 145px;
+            text-align: center;
+        }
+
+        .request-button {
+            width: 100%;
+        }
+
+        .request-status {
+            min-height: 18px;
+            margin: 7px 0 0;
+            font-size: 12px;
+            line-height: 1.35;
+        }
+
+        .request-status.success {
+            color: #386a20;
+            font-weight: bold;
+        }
+
+        .request-status.error {
+            color: #ba1a1a;
+            font-weight: bold;
         }
 
         .note {
-            margin: 22px 0 0;
+            margin: 26px 0 0;
             color: #79747e;
             font-size: 13px;
-            line-height: 1.4;
+            line-height: 1.45;
+            text-align: center;
         }
 
         [hidden] {
-            display: none;
+            display: none !important;
+        }
+
+        @media (max-width: 620px) {
+            body {
+                padding: 12px;
+            }
+
+            .card {
+                padding: 24px 18px;
+            }
+
+            .search-row {
+                display: block;
+            }
+
+            .search-button {
+                width: 100%;
+                margin-top: 10px;
+            }
+
+            .track {
+                align-items: flex-start;
+                flex-wrap: wrap;
+            }
+
+            .track-image {
+                width: 64px;
+                height: 64px;
+                flex-basis: 64px;
+            }
+
+            .track-actions {
+                width: 100%;
+                flex-basis: 100%;
+            }
         }
     </style>
 </head>
 
 <body>
-    <main class="card">
-        <div
-            class="music-icon"
-            aria-hidden="true"
-        >
-            🎵
-        </div>
+    <main class="page">
+        <section class="card">
 
-        <h1>PARTYQUEUE</h1>
+            <header class="header">
+                <div
+                    class="music-icon"
+                    aria-hidden="true"
+                >
+                    🎵
+                </div>
 
-        <p class="subtitle">
-            You have been invited to help choose the music.
-        </p>
+                <h1>PARTYQUEUE</h1>
 
-        <div class="party-label">
-            Party code
-        </div>
+                <p class="subtitle">
+                    Join the party and help choose the music.
+                </p>
 
-        <div
-            id="partyCode"
-            class="party-code"
-        >
-            Loading...
-        </div>
+                <div class="party-label">
+                    Party code
+                </div>
 
-        <form id="joinForm">
-            <label for="guestName">
-                Your name
-            </label>
+                <div
+                    id="partyCode"
+                    class="party-code"
+                >
+                    Loading...
+                </div>
+            </header>
 
-            <input
-                id="guestName"
-                name="guestName"
-                type="text"
-                maxlength="30"
-                autocomplete="name"
-                placeholder="Enter your name"
-                required
+            <section
+                id="joinSection"
+                class="section"
             >
+                <h2 class="section-title">
+                    Join the party
+                </h2>
 
-            <button
-                id="continueButton"
-                type="submit"
+                <p class="section-description">
+                    Enter your name before requesting songs.
+                </p>
+
+                <form id="joinForm">
+                    <label for="guestName">
+                        Your name
+                    </label>
+
+                    <input
+                        id="guestName"
+                        name="guestName"
+                        type="text"
+                        maxlength="30"
+                        autocomplete="name"
+                        placeholder="Enter your name"
+                        required
+                    >
+
+                    <button
+                        id="joinButton"
+                        class="full-width-button"
+                        type="submit"
+                    >
+                        JOIN PARTY
+                    </button>
+                </form>
+
+                <p
+                    id="joinMessage"
+                    class="message"
+                    aria-live="polite"
+                ></p>
+            </section>
+
+            <section
+                id="searchSection"
+                class="section"
+                hidden
             >
-                JOIN PARTY
-            </button>
-        </form>
+                <div class="joined-panel">
+                    <strong>
+                        You're in! 🎉
+                    </strong>
 
-        <section
-            id="successPanel"
-            class="success-panel"
-            hidden
-        >
-            <h2>You're in! 🎉</h2>
+                    <span id="joinedMessage"></span>
+                </div>
 
-            <p id="successMessage"></p>
+                <h2 class="section-title">
+                    Request a song
+                </h2>
 
-            <p>
-                Song searching and requests will be added next.
+                <p class="section-description">
+                    Search Spotify by song title or artist.
+                    Requested songs are added automatically to
+                    the host's playlist.
+                </p>
+
+                <form id="searchForm">
+                    <label for="searchInput">
+                        Search Spotify
+                    </label>
+
+                    <div class="search-row">
+                        <input
+                            id="searchInput"
+                            type="search"
+                            minlength="2"
+                            maxlength="100"
+                            placeholder="Song or artist"
+                            autocomplete="off"
+                            required
+                        >
+
+                        <button
+                            id="searchButton"
+                            class="search-button"
+                            type="submit"
+                        >
+                            SEARCH
+                        </button>
+                    </div>
+                </form>
+
+                <p
+                    id="searchMessage"
+                    class="message"
+                    aria-live="polite"
+                ></p>
+
+                <section
+                    id="results"
+                    class="results"
+                    aria-live="polite"
+                ></section>
+            </section>
+
+            <p class="note">
+                Each guest may have up to five songs waiting
+                in the request queue.
             </p>
         </section>
-
-        <p
-            id="message"
-            class="message"
-            aria-live="polite"
-        ></p>
-
-        <p class="note">
-            PartyQueue remembers your guest session on this
-            device so you can return to the party.
-        </p>
     </main>
 
     <script type="module">
@@ -253,8 +496,8 @@
         } from "https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.112.3/+esm";
 
         /*
-         * Replace these two placeholders with the Project URL
-         * and publishable key saved in Notepad.
+         * Replace these placeholders with the same public
+         * Supabase values used by your existing guest page.
          */
         const SUPABASE_URL =
             "https://nszqzyrhlyjkvzfrbeih.supabase.co";
@@ -262,23 +505,39 @@
         const SUPABASE_PUBLISHABLE_KEY =
             "sb_publishable_AGN1WppiECaM4_WvbOxdLg_-QXEM4o-";
 
-        const supabaseClient = createClient(
-            SUPABASE_URL,
-            SUPABASE_PUBLISHABLE_KEY,
-            {
-                auth: {
-                    persistSession: true,
-                    autoRefreshToken: true,
-                    detectSessionInUrl: true
-                }
-            }
-        );
+        const configurationIsReady =
+            !SUPABASE_URL.includes(
+                "PASTE_YOUR"
+            ) &&
+            !SUPABASE_PUBLISHABLE_KEY.includes(
+                "PASTE_YOUR"
+            );
 
-        const parameters =
-            new URLSearchParams(window.location.search);
+        const supabaseClient =
+            configurationIsReady
+                ? createClient(
+                    SUPABASE_URL,
+                    SUPABASE_PUBLISHABLE_KEY,
+                    {
+                        auth: {
+                            persistSession: true,
+                            autoRefreshToken: true,
+                            detectSessionInUrl: true
+                        }
+                    }
+                )
+                : null;
+
+        const urlParameters =
+            new URLSearchParams(
+                window.location.search
+            );
 
         const partyCode =
-            (parameters.get("code") || "")
+            (
+                urlParameters.get("code") ||
+                ""
+            )
                 .trim()
                 .toUpperCase();
 
@@ -286,91 +545,116 @@
             /^[A-HJ-NP-Z2-9]{6}$/;
 
         const partyCodeElement =
-            document.getElementById("partyCode");
-
-        const joinForm =
-            document.getElementById("joinForm");
-
-        const guestNameInput =
-            document.getElementById("guestName");
-
-        const continueButton =
-            document.getElementById("continueButton");
-
-        const messageElement =
-            document.getElementById("message");
-
-        const successPanel =
-            document.getElementById("successPanel");
-
-        const successMessage =
-            document.getElementById("successMessage");
-
-        const configurationIsReady =
-            !SUPABASE_URL.includes("PASTE_YOUR") &&
-            !SUPABASE_PUBLISHABLE_KEY.includes(
-                "PASTE_YOUR"
+            document.getElementById(
+                "partyCode"
             );
 
-        function showError(message) {
-            messageElement.textContent = message;
-            messageElement.className =
-                "message error";
+        const joinSection =
+            document.getElementById(
+                "joinSection"
+            );
+
+        const joinForm =
+            document.getElementById(
+                "joinForm"
+            );
+
+        const guestNameInput =
+            document.getElementById(
+                "guestName"
+            );
+
+        const joinButton =
+            document.getElementById(
+                "joinButton"
+            );
+
+        const joinMessage =
+            document.getElementById(
+                "joinMessage"
+            );
+
+        const searchSection =
+            document.getElementById(
+                "searchSection"
+            );
+
+        const joinedMessage =
+            document.getElementById(
+                "joinedMessage"
+            );
+
+        const searchForm =
+            document.getElementById(
+                "searchForm"
+            );
+
+        const searchInput =
+            document.getElementById(
+                "searchInput"
+            );
+
+        const searchButton =
+            document.getElementById(
+                "searchButton"
+            );
+
+        const searchMessage =
+            document.getElementById(
+                "searchMessage"
+            );
+
+        const resultsElement =
+            document.getElementById(
+                "results"
+            );
+
+        function setMessage(
+            element,
+            message,
+            type = ""
+        ) {
+            element.textContent =
+                message;
+
+            element.className =
+                type
+                    ? `message ${type}`
+                    : "message";
         }
 
-        function clearMessage() {
-            messageElement.textContent = "";
-            messageElement.className =
-                "message";
+        function clearResults() {
+            resultsElement.replaceChildren();
         }
 
-        function getFriendlyError(error) {
-            const technicalMessage =
-                error?.message || "";
+        function displaySearchScreen(
+            guestName
+        ) {
+            joinSection.hidden =
+                true;
 
-            if (
-                technicalMessage.includes(
-                    "Party not found"
-                )
-            ) {
-                return (
-                    "This party could not be found, " +
-                    "or it is no longer active."
-                );
-            }
+            searchSection.hidden =
+                false;
 
-            if (
-                technicalMessage.includes(
-                    "Anonymous sign-ins are disabled"
-                )
-            ) {
-                return (
-                    "Guest sign-in is not currently enabled."
-                );
-            }
+            joinedMessage.textContent =
+                `${guestName}, you joined party ${partyCode}.`;
 
-            if (
-                technicalMessage.includes(
-                    "Failed to fetch"
-                )
-            ) {
-                return (
-                    "Could not reach PartyQueue. " +
-                    "Check your internet connection and try again."
-                );
-            }
-
-            return technicalMessage
-                ? `Could not join the party: ${technicalMessage}`
-                : "Could not join the party. Please try again.";
+            searchInput.focus();
         }
 
         async function ensureAnonymousSession() {
+            if (!supabaseClient) {
+                throw new Error(
+                    "PartyQueue is not connected to Supabase."
+                );
+            }
+
             const {
                 data,
                 error
             } =
-                await supabaseClient.auth.getSession();
+                await supabaseClient.auth
+                    .getSession();
 
             if (error) {
                 throw error;
@@ -389,23 +673,502 @@
             }
         }
 
-        if (validPartyCodePattern.test(partyCode)) {
-            partyCodeElement.textContent = partyCode;
-        } else {
-            partyCodeElement.textContent = "NO CODE";
-            continueButton.disabled = true;
+        async function readFunctionError(
+            error
+        ) {
+            const response =
+                error?.context;
 
-            showError(
-                "Please scan a valid PartyQueue QR code."
+            if (
+                response &&
+                typeof response.clone ===
+                    "function"
+            ) {
+                try {
+                    const body =
+                        await response
+                            .clone()
+                            .json();
+
+                    if (
+                        typeof body?.error ===
+                            "string"
+                    ) {
+                        return body.error;
+                    }
+
+                    if (
+                        typeof body?.message ===
+                            "string"
+                    ) {
+                        return body.message;
+                    }
+                } catch {
+                    /*
+                     * Use the normal error message below.
+                     */
+                }
+            }
+
+            return (
+                error?.message ||
+                "PartyQueue could not complete the request."
+            );
+        }
+
+        function formatDuration(
+            durationMilliseconds
+        ) {
+            if (
+                typeof durationMilliseconds !==
+                    "number" ||
+                !Number.isFinite(
+                    durationMilliseconds
+                )
+            ) {
+                return "";
+            }
+
+            const totalSeconds =
+                Math.floor(
+                    durationMilliseconds / 1000
+                );
+
+            const minutes =
+                Math.floor(
+                    totalSeconds / 60
+                );
+
+            const seconds =
+                totalSeconds % 60;
+
+            return (
+                `${minutes}:` +
+                seconds
+                    .toString()
+                    .padStart(2, "0")
+            );
+        }
+
+        function createTrackImage(
+            track
+        ) {
+            if (track.imageUrl) {
+                const image =
+                    document.createElement(
+                        "img"
+                    );
+
+                image.className =
+                    "track-image";
+
+                image.src =
+                    track.imageUrl;
+
+                image.alt =
+                    `Album artwork for ${track.trackName}`;
+
+                image.loading =
+                    "lazy";
+
+                return image;
+            }
+
+            const placeholder =
+                document.createElement(
+                    "div"
+                );
+
+            placeholder.className =
+                "track-image image-placeholder";
+
+            placeholder.textContent =
+                "🎵";
+
+            placeholder.setAttribute(
+                "aria-hidden",
+                "true"
+            );
+
+            return placeholder;
+        }
+
+        async function requestTrack(
+            track,
+            requestButton,
+            statusElement
+        ) {
+            requestButton.disabled =
+                true;
+
+            requestButton.textContent =
+                "REQUESTING...";
+
+            statusElement.textContent =
+                "";
+
+            statusElement.className =
+                "request-status";
+
+            try {
+                await ensureAnonymousSession();
+
+                const {
+                    error
+                } =
+                    await supabaseClient.rpc(
+                        "request_song",
+                        {
+                            p_code:
+                                partyCode,
+
+                            p_spotify_track_id:
+                                track.spotifyTrackId,
+
+                            p_spotify_uri:
+                                track.spotifyUri,
+
+                            p_track_name:
+                                track.trackName,
+
+                            p_artist_name:
+                                track.artistName,
+
+                            p_album_name:
+                                track.albumName || "",
+
+                            p_image_url:
+                                track.imageUrl || ""
+                        }
+                    );
+
+                if (error) {
+                    throw error;
+                }
+
+                requestButton.textContent =
+                    "REQUESTED";
+
+                statusElement.textContent =
+                    "Added to the party queue.";
+
+                statusElement.className =
+                    "request-status success";
+
+            } catch (error) {
+                console.error(
+                    "Song request error:",
+                    error
+                );
+
+                const errorMessage =
+                    error?.message ||
+                    "Could not request this song.";
+
+                if (
+                    errorMessage.includes(
+                        "already been requested"
+                    )
+                ) {
+                    requestButton.textContent =
+                        "ALREADY REQUESTED";
+
+                    statusElement.textContent =
+                        "This song is already in the queue.";
+
+                    statusElement.className =
+                        "request-status error";
+
+                    return;
+                }
+
+                if (
+                    errorMessage.includes(
+                        "five songs waiting"
+                    )
+                ) {
+                    requestButton.textContent =
+                        "REQUEST";
+
+                    requestButton.disabled =
+                        false;
+
+                    statusElement.textContent =
+                        "You already have five songs waiting.";
+
+                    statusElement.className =
+                        "request-status error";
+
+                    return;
+                }
+
+                requestButton.disabled =
+                    false;
+
+                requestButton.textContent =
+                    "REQUEST";
+
+                statusElement.textContent =
+                    errorMessage;
+
+                statusElement.className =
+                    "request-status error";
+            }
+        }
+
+        function createTrackElement(
+            track
+        ) {
+            const trackElement =
+                document.createElement(
+                    "article"
+                );
+
+            trackElement.className =
+                "track";
+
+            trackElement.appendChild(
+                createTrackImage(track)
+            );
+
+            const detailsElement =
+                document.createElement(
+                    "div"
+                );
+
+            detailsElement.className =
+                "track-details";
+
+            const trackNameElement =
+                document.createElement(
+                    "p"
+                );
+
+            trackNameElement.className =
+                "track-name";
+
+            trackNameElement.textContent =
+                track.trackName;
+
+            if (track.explicit === true) {
+                const explicitElement =
+                    document.createElement(
+                        "span"
+                    );
+
+                explicitElement.className =
+                    "explicit";
+
+                explicitElement.textContent =
+                    "E";
+
+                explicitElement.title =
+                    "Explicit";
+
+                trackNameElement.appendChild(
+                    explicitElement
+                );
+            }
+
+            const artistElement =
+                document.createElement(
+                    "p"
+                );
+
+            artistElement.className =
+                "artist-name";
+
+            artistElement.textContent =
+                track.artistName;
+
+            const albumElement =
+                document.createElement(
+                    "p"
+                );
+
+            albumElement.className =
+                "album-name";
+
+            albumElement.textContent =
+                track.albumName ||
+                "Album unavailable";
+
+            const metadataElement =
+                document.createElement(
+                    "div"
+                );
+
+            metadataElement.className =
+                "track-meta";
+
+            const duration =
+                formatDuration(
+                    track.durationMs
+                );
+
+            metadataElement.textContent =
+                duration
+                    ? `Duration: ${duration}`
+                    : "Spotify track";
+
+            detailsElement.append(
+                trackNameElement,
+                artistElement,
+                albumElement,
+                metadataElement
+            );
+
+            const actionsElement =
+                document.createElement(
+                    "div"
+                );
+
+            actionsElement.className =
+                "track-actions";
+
+            const requestButton =
+                document.createElement(
+                    "button"
+                );
+
+            requestButton.className =
+                "request-button";
+
+            requestButton.type =
+                "button";
+
+            requestButton.textContent =
+                "REQUEST";
+
+            const statusElement =
+                document.createElement(
+                    "p"
+                );
+
+            statusElement.className =
+                "request-status";
+
+            statusElement.setAttribute(
+                "aria-live",
+                "polite"
+            );
+
+            const validTrack =
+                typeof track.spotifyTrackId ===
+                    "string" &&
+                track.spotifyTrackId.length > 0 &&
+                typeof track.spotifyUri ===
+                    "string" &&
+                track.spotifyUri.startsWith(
+                    "spotify:track:"
+                );
+
+            if (!validTrack) {
+                requestButton.disabled =
+                    true;
+
+                statusElement.textContent =
+                    "This track cannot be requested.";
+
+                statusElement.className =
+                    "request-status error";
+            } else {
+                requestButton.addEventListener(
+                    "click",
+                    function () {
+                        requestTrack(
+                            track,
+                            requestButton,
+                            statusElement
+                        );
+                    }
+                );
+            }
+
+            actionsElement.append(
+                requestButton,
+                statusElement
+            );
+
+            trackElement.append(
+                detailsElement,
+                actionsElement
+            );
+
+            return trackElement;
+        }
+
+        function displayTracks(
+            tracks
+        ) {
+            clearResults();
+
+            if (
+                !Array.isArray(tracks) ||
+                tracks.length === 0
+            ) {
+                setMessage(
+                    searchMessage,
+                    "No matching Spotify tracks were found."
+                );
+
+                return;
+            }
+
+            const fragment =
+                document.createDocumentFragment();
+
+            tracks.forEach(
+                function (track) {
+                    fragment.appendChild(
+                        createTrackElement(
+                            track
+                        )
+                    );
+                }
+            );
+
+            resultsElement.appendChild(
+                fragment
+            );
+
+            setMessage(
+                searchMessage,
+                `Found ${tracks.length} Spotify tracks.`,
+                "success"
+            );
+        }
+
+        if (
+            validPartyCodePattern.test(
+                partyCode
+            )
+        ) {
+            partyCodeElement.textContent =
+                partyCode;
+        } else {
+            partyCodeElement.textContent =
+                "NO CODE";
+
+            joinButton.disabled =
+                true;
+
+            setMessage(
+                joinMessage,
+                "Please scan a valid PartyQueue QR code.",
+                "error"
             );
         }
 
         if (!configurationIsReady) {
-            continueButton.disabled = true;
+            joinButton.disabled =
+                true;
 
-            showError(
-                "The PartyQueue website has not been " +
-                "connected to Supabase yet."
+            setMessage(
+                joinMessage,
+                "This PartyQueue page has not been connected " +
+                    "to Supabase.",
+                "error"
             );
         }
 
@@ -415,7 +1178,8 @@
             );
 
         if (savedName) {
-            guestNameInput.value = savedName;
+            guestNameInput.value =
+                savedName;
         }
 
         joinForm.addEventListener(
@@ -424,11 +1188,14 @@
                 event.preventDefault();
 
                 const guestName =
-                    guestNameInput.value.trim();
+                    guestNameInput.value
+                        .trim();
 
                 if (!guestName) {
-                    showError(
-                        "Please enter your name."
+                    setMessage(
+                        joinMessage,
+                        "Please enter your name.",
+                        "error"
                     );
 
                     guestNameInput.focus();
@@ -436,8 +1203,10 @@
                 }
 
                 if (guestName.length > 30) {
-                    showError(
-                        "Your name must be 30 characters or fewer."
+                    setMessage(
+                        joinMessage,
+                        "Your name must be 30 characters or fewer.",
+                        "error"
                     );
 
                     guestNameInput.focus();
@@ -449,21 +1218,31 @@
                         partyCode
                     )
                 ) {
-                    showError(
-                        "Please scan a valid PartyQueue QR code."
+                    setMessage(
+                        joinMessage,
+                        "Please scan a valid PartyQueue QR code.",
+                        "error"
                     );
 
                     return;
                 }
 
-                clearMessage();
+                joinButton.disabled =
+                    true;
 
-                continueButton.disabled = true;
-                guestNameInput.disabled = true;
-                continueButton.textContent =
+                guestNameInput.disabled =
+                    true;
+
+                joinButton.textContent =
                     "JOINING...";
 
-                let joinedSuccessfully = false;
+                setMessage(
+                    joinMessage,
+                    "Joining the party..."
+                );
+
+                let joinedSuccessfully =
+                    false;
 
                 try {
                     await ensureAnonymousSession();
@@ -474,8 +1253,11 @@
                         await supabaseClient.rpc(
                             "join_party",
                             {
-                                p_code: partyCode,
-                                p_display_name: guestName
+                                p_code:
+                                    partyCode,
+
+                                p_display_name:
+                                    guestName
                             }
                         );
 
@@ -488,31 +1270,159 @@
                         guestName
                     );
 
-                    successMessage.textContent =
-                        `${guestName}, you joined party ` +
-                        `${partyCode}.`;
+                    joinedSuccessfully =
+                        true;
 
-                    joinForm.hidden = true;
-                    successPanel.hidden = false;
-                    joinedSuccessfully = true;
+                    setMessage(
+                        joinMessage,
+                        ""
+                    );
+
+                    displaySearchScreen(
+                        guestName
+                    );
 
                 } catch (error) {
                     console.error(
-                        "PartyQueue join error:",
+                        "Party join error:",
                         error
                     );
 
-                    showError(
-                        getFriendlyError(error)
+                    const technicalMessage =
+                        error?.message || "";
+
+                    const friendlyMessage =
+                        technicalMessage.includes(
+                            "Party not found"
+                        )
+                            ? (
+                                "This party could not be found " +
+                                "or is no longer active."
+                            )
+                            : (
+                                technicalMessage ||
+                                "Could not join the party."
+                            );
+
+                    setMessage(
+                        joinMessage,
+                        friendlyMessage,
+                        "error"
                     );
 
                 } finally {
                     if (!joinedSuccessfully) {
-                        continueButton.disabled = false;
-                        guestNameInput.disabled = false;
-                        continueButton.textContent =
+                        joinButton.disabled =
+                            false;
+
+                        guestNameInput.disabled =
+                            false;
+
+                        joinButton.textContent =
                             "JOIN PARTY";
                     }
+                }
+            }
+        );
+
+        searchForm.addEventListener(
+            "submit",
+            async function (event) {
+                event.preventDefault();
+
+                const query =
+                    searchInput.value
+                        .trim();
+
+                if (query.length < 2) {
+                    setMessage(
+                        searchMessage,
+                        "Enter at least two characters.",
+                        "error"
+                    );
+
+                    searchInput.focus();
+                    return;
+                }
+
+                clearResults();
+
+                searchButton.disabled =
+                    true;
+
+                searchInput.disabled =
+                    true;
+
+                searchButton.textContent =
+                    "SEARCHING...";
+
+                setMessage(
+                    searchMessage,
+                    "Searching Spotify..."
+                );
+
+                try {
+                    await ensureAnonymousSession();
+
+                    const {
+                        data,
+                        error
+                    } =
+                        await supabaseClient
+                            .functions
+                            .invoke(
+                                "spotify-search",
+                                {
+                                    body: {
+                                        query,
+                                        partyCode
+                                    }
+                                }
+                            );
+
+                    if (error) {
+                        throw new Error(
+                            await readFunctionError(
+                                error
+                            )
+                        );
+                    }
+
+                    if (
+                        typeof data?.error ===
+                            "string"
+                    ) {
+                        throw new Error(
+                            data.error
+                        );
+                    }
+
+                    displayTracks(
+                        data?.tracks
+                    );
+
+                } catch (error) {
+                    console.error(
+                        "Spotify search error:",
+                        error
+                    );
+
+                    setMessage(
+                        searchMessage,
+                        error?.message ||
+                            "PartyQueue could not search Spotify.",
+                        "error"
+                    );
+
+                } finally {
+                    searchButton.disabled =
+                        false;
+
+                    searchInput.disabled =
+                        false;
+
+                    searchButton.textContent =
+                        "SEARCH";
                 }
             }
         );
