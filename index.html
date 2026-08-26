@@ -168,6 +168,29 @@
             font-size: 20px;
         }
 
+        .ended-panel {
+            padding: 28px 20px;
+            border-radius: 18px;
+            background: #f3edf7;
+            text-align: center;
+        }
+
+        .ended-icon {
+            margin-bottom: 12px;
+            font-size: 54px;
+        }
+
+        .ended-panel h2 {
+            margin: 0 0 12px;
+            font-size: 26px;
+        }
+
+        .ended-panel p {
+            margin: 0;
+            color: #625b71;
+            line-height: 1.55;
+        }
+
         .search-row {
             display: flex;
             gap: 10px;
@@ -440,8 +463,8 @@
 
                 <p class="section-description">
                     Search Spotify by song title or artist.
-                    Requested songs are added automatically to
-                    the host's playlist.
+                    Requested songs are sent to the host's
+                    live Spotify queue.
                 </p>
 
                 <form id="searchForm">
@@ -483,7 +506,35 @@
                 ></section>
             </section>
 
-            <p class="note">
+            <section
+                id="endedSection"
+                class="section"
+                hidden
+            >
+                <div class="ended-panel">
+                    <div
+                        class="ended-icon"
+                        aria-hidden="true"
+                    >
+                        ⏹️
+                    </div>
+
+                    <h2>
+                        This party has ended
+                    </h2>
+
+                    <p id="endedMessage">
+                        New guests and song requests are
+                        no longer being accepted. The Spotify
+                        playlist remains with the host.
+                    </p>
+                </div>
+            </section>
+
+            <p
+                id="queueLimitNote"
+                class="note"
+            >
                 Each guest may have up to five songs waiting
                 in the request queue.
             </p>
@@ -504,6 +555,9 @@
 
         const SUPABASE_PUBLISHABLE_KEY =
             "sb_publishable_AGN1WppiECaM4_WvbOxdLg_-QXEM4o-";
+
+        const PARTY_STATUS_INTERVAL_MILLISECONDS =
+            5_000;
 
         const configurationIsReady =
             !SUPABASE_URL.includes(
@@ -609,6 +663,33 @@
                 "results"
             );
 
+        const endedSection =
+            document.getElementById(
+                "endedSection"
+            );
+
+        const endedMessage =
+            document.getElementById(
+                "endedMessage"
+            );
+
+        const queueLimitNote =
+            document.getElementById(
+                "queueLimitNote"
+            );
+
+        let partyHasEnded =
+            false;
+
+        let joinedGuestName =
+            "";
+
+        let partyStatusTimer =
+            null;
+
+        let partyStatusCheckIsRunning =
+            false;
+
         function setMessage(
             element,
             message,
@@ -627,10 +708,72 @@
             resultsElement.replaceChildren();
         }
 
+        function stopPartyStatusMonitor() {
+            if (partyStatusTimer !== null) {
+                window.clearInterval(
+                    partyStatusTimer
+                );
+
+                partyStatusTimer =
+                    null;
+            }
+        }
+
+        function showPartyEnded(
+            message =
+                "New guests and song requests are no " +
+                "longer being accepted. The Spotify " +
+                "playlist remains with the host."
+        ) {
+            if (partyHasEnded) {
+                return;
+            }
+
+            partyHasEnded =
+                true;
+
+            stopPartyStatusMonitor();
+
+            joinButton.disabled =
+                true;
+
+            searchButton.disabled =
+                true;
+
+            guestNameInput.disabled =
+                true;
+
+            searchInput.disabled =
+                true;
+
+            clearResults();
+
+            joinSection.hidden =
+                true;
+
+            searchSection.hidden =
+                true;
+
+            endedSection.hidden =
+                false;
+
+            queueLimitNote.hidden =
+                true;
+
+            endedMessage.textContent =
+                message;
+        }
+
         function displaySearchScreen(
             guestName
         ) {
+            joinedGuestName =
+                guestName;
+
             joinSection.hidden =
+                true;
+
+            endedSection.hidden =
                 true;
 
             searchSection.hidden =
@@ -640,6 +783,8 @@
                 `${guestName}, you joined party ${partyCode}.`;
 
             searchInput.focus();
+
+            startPartyStatusMonitor();
         }
 
         async function ensureAnonymousSession() {
@@ -673,6 +818,121 @@
             }
         }
 
+        /*
+         * Returns:
+         *
+         * true  = the party is active
+         * false = the party has ended
+         * null  = the status could not currently be checked
+         */
+        async function checkPartyActive() {
+            if (
+                !supabaseClient ||
+                !validPartyCodePattern.test(
+                    partyCode
+                )
+            ) {
+                return null;
+            }
+
+            try {
+                const {
+                    data,
+                    error
+                } =
+                    await supabaseClient
+                        .from("parties")
+                        .select("active")
+                        .eq(
+                            "code",
+                            partyCode
+                        )
+                        .maybeSingle();
+
+                if (error) {
+                    console.warn(
+                        "Party status check failed:",
+                        error
+                    );
+
+                    return null;
+                }
+
+                if (!data) {
+                    return null;
+                }
+
+                return data.active === true;
+
+            } catch (error) {
+                console.warn(
+                    "Party status check failed:",
+                    error
+                );
+
+                return null;
+            }
+        }
+
+        async function requireActiveParty() {
+            if (partyHasEnded) {
+                throw new Error(
+                    "This party has ended."
+                );
+            }
+
+            const partyIsActive =
+                await checkPartyActive();
+
+            if (partyIsActive === false) {
+                showPartyEnded();
+
+                throw new Error(
+                    "This party has ended."
+                );
+            }
+        }
+
+        async function runPartyStatusCheck() {
+            if (
+                partyHasEnded ||
+                partyStatusCheckIsRunning ||
+                document.hidden
+            ) {
+                return;
+            }
+
+            partyStatusCheckIsRunning =
+                true;
+
+            try {
+                const partyIsActive =
+                    await checkPartyActive();
+
+                if (partyIsActive === false) {
+                    showPartyEnded();
+                }
+
+            } finally {
+                partyStatusCheckIsRunning =
+                    false;
+            }
+        }
+
+        function startPartyStatusMonitor() {
+            stopPartyStatusMonitor();
+
+            void runPartyStatusCheck();
+
+            partyStatusTimer =
+                window.setInterval(
+                    function () {
+                        void runPartyStatusCheck();
+                    },
+                    PARTY_STATUS_INTERVAL_MILLISECONDS
+                );
+        }
+
         async function readFunctionError(
             error
         ) {
@@ -703,6 +963,7 @@
                     ) {
                         return body.message;
                     }
+
                 } catch {
                     /*
                      * Use the normal error message below.
@@ -798,6 +1059,11 @@
             requestButton,
             statusElement
         ) {
+            if (partyHasEnded) {
+                showPartyEnded();
+                return;
+            }
+
             requestButton.disabled =
                 true;
 
@@ -812,6 +1078,8 @@
 
             try {
                 await ensureAnonymousSession();
+
+                await requireActiveParty();
 
                 const {
                     error
@@ -861,6 +1129,17 @@
                     error
                 );
 
+                const partyIsActive =
+                    await checkPartyActive();
+
+                if (
+                    partyHasEnded ||
+                    partyIsActive === false
+                ) {
+                    showPartyEnded();
+                    return;
+                }
+
                 const errorMessage =
                     error?.message ||
                     "Could not request this song.";
@@ -887,11 +1166,11 @@
                         "five songs waiting"
                     )
                 ) {
-                    requestButton.textContent =
-                        "REQUEST";
-
                     requestButton.disabled =
                         false;
+
+                    requestButton.textContent =
+                        "REQUEST";
 
                     statusElement.textContent =
                         "You already have five songs waiting.";
@@ -1072,11 +1351,12 @@
 
                 statusElement.className =
                     "request-status error";
+
             } else {
                 requestButton.addEventListener(
                     "click",
                     function () {
-                        requestTrack(
+                        void requestTrack(
                             track,
                             requestButton,
                             statusElement
@@ -1146,6 +1426,7 @@
         ) {
             partyCodeElement.textContent =
                 partyCode;
+
         } else {
             partyCodeElement.textContent =
                 "NO CODE";
@@ -1166,8 +1447,8 @@
 
             setMessage(
                 joinMessage,
-                "This PartyQueue page has not been connected " +
-                    "to Supabase.",
+                "This PartyQueue page has not been " +
+                    "connected to Supabase.",
                 "error"
             );
         }
@@ -1291,22 +1572,29 @@
                     const technicalMessage =
                         error?.message || "";
 
-                    const friendlyMessage =
+                    const partyEnded =
                         technicalMessage.includes(
                             "Party not found"
-                        )
-                            ? (
-                                "This party could not be found " +
-                                "or is no longer active."
-                            )
-                            : (
-                                technicalMessage ||
-                                "Could not join the party."
-                            );
+                        ) ||
+                        technicalMessage.includes(
+                            "no longer active"
+                        );
+
+                    if (partyEnded) {
+                        showPartyEnded(
+                            "This party has ended or is no " +
+                                "longer accepting guests. " +
+                                "The Spotify playlist remains " +
+                                "with the host."
+                        );
+
+                        return;
+                    }
 
                     setMessage(
                         joinMessage,
-                        friendlyMessage,
+                        technicalMessage ||
+                            "Could not join the party.",
                         "error"
                     );
 
@@ -1329,6 +1617,11 @@
             "submit",
             async function (event) {
                 event.preventDefault();
+
+                if (partyHasEnded) {
+                    showPartyEnded();
+                    return;
+                }
 
                 const query =
                     searchInput.value
@@ -1363,6 +1656,8 @@
 
                 try {
                     await ensureAnonymousSession();
+
+                    await requireActiveParty();
 
                     const {
                         data,
@@ -1407,6 +1702,17 @@
                         error
                     );
 
+                    const partyIsActive =
+                        await checkPartyActive();
+
+                    if (
+                        partyHasEnded ||
+                        partyIsActive === false
+                    ) {
+                        showPartyEnded();
+                        return;
+                    }
+
                     setMessage(
                         searchMessage,
                         error?.message ||
@@ -1415,15 +1721,37 @@
                     );
 
                 } finally {
-                    searchButton.disabled =
-                        false;
+                    if (!partyHasEnded) {
+                        searchButton.disabled =
+                            false;
 
-                    searchInput.disabled =
-                        false;
+                        searchInput.disabled =
+                            false;
 
-                    searchButton.textContent =
-                        "SEARCH";
+                        searchButton.textContent =
+                            "SEARCH";
+                    }
                 }
+            }
+        );
+
+        document.addEventListener(
+            "visibilitychange",
+            function () {
+                if (
+                    !document.hidden &&
+                    joinedGuestName &&
+                    !partyHasEnded
+                ) {
+                    void runPartyStatusCheck();
+                }
+            }
+        );
+
+        window.addEventListener(
+            "beforeunload",
+            function () {
+                stopPartyStatusMonitor();
             }
         );
     </script>
